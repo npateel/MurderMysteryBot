@@ -1,0 +1,14 @@
+{
+    "rooms":[
+        {"name": "Engine Room", "id": "engine-room", "capacity" : 2},
+        {"name": "Dining Carriage", "id": "dining-carriage", "capacity" : 7},
+        {"name": "Kitchen", "id": "kitchen", "capacity" : 3},
+        {"name": "Sleeper Carriage", "id": "sleeper-carriage", "capacity" : 5},
+        {"name": "Cargo Car", "id": "cargo-car", "capacity" : 4},
+        {"name": "Caboose", "id": "caboose", "capacity" : 5}
+    ],
+    "commandsChannel": "bot-spam",
+    "prefix" : "!"
+}
+
+

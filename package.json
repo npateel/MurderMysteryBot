@@ -1,0 +1,16 @@
+{
+  "name": "mystery-bot",
+  "version": "1.0.0",
+  "description": "A bot for our murder mystery parties",
+  "main": "bot.js",
+  "author": "Nikhil Pateel",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "winston": "^3.2.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "license": "ISC"
+}
