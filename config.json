@@ -1,14 +1,16 @@
 {
-    "rooms":[
-        {"name": "Engine Room", "id": "engine-room", "capacity" : 2},
-        {"name": "Dining Carriage", "id": "dining-carriage", "capacity" : 7},
-        {"name": "Kitchen", "id": "kitchen", "capacity" : 3},
-        {"name": "Sleeper Carriage", "id": "sleeper-carriage", "capacity" : 5},
-        {"name": "Cargo Car", "id": "cargo-car", "capacity" : 4},
-        {"name": "Caboose", "id": "caboose", "capacity" : 5}
+    "rooms": [
+        {"name": "Clinic", "id": "clinic", "capacity": 2},
+        {"name": "Common Room", "id": "common-room", "capacity": 7},
+        {"name": "Kitchen", "id": "kitchen", "capacity": 4},
+        {"name": "Sleeping Station", "id": "sleeping-station", "capacity": 5},
+        {"name": "Garden", "id": "garden", "capacity": 3},
+        {"name": "Mars Surface", "id": "surface", "capacity": 7}
     ],
-    "commandsChannel": "bot-spam",
-    "prefix" : "!"
+    "commandsChannel": "explorer-spam",
+    "prefix": "!",
+    "doctorMessaged": false,
+    "doctor": "penelope",
+    "admins": ["sputnikhil", "mission control g", "mission control a"]
+
 }
-
-

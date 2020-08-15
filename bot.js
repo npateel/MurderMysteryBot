@@ -2,15 +2,16 @@
 // Written by Nikhil Pateel
 
 // Top level variables
-var Discord = require('discord.js');
-var logger = require('winston');
-const config = require('./config.json');
+let fs = require('fs');
+let Discord = require('discord.js');
+let logger = require('winston');
+let config = require('./config.json');
 const auth = require('./auth.json');
 
 
 
-var roomsList = config.rooms;
-var rooms = {};
+let roomsList = config.rooms;
+let rooms = {};
 for (let i = 0; i < roomsList.length; i++) {
     room = roomsList[i];
     rooms[room.name.toLowerCase()] = room.capacity;
@@ -28,7 +29,7 @@ logger.level = 'debug';
 logger.info(rooms);
 
 //Initialize the Discord Bot
-var bot = new Discord.Client();
+let bot = new Discord.Client();
 
 bot.once('ready', () => {
     logger.info('Ready!');
@@ -37,6 +38,17 @@ bot.once('ready', () => {
 
 
 bot.on('message', message => {
+    if (!message.channel.name) {
+        return;
+    }
+    if (!message.author.bot && message.channel.name.toLowerCase() === 'garden') {
+        tokens = message.content.split(/ +/);
+        code = tokens.find(tok => tok === '1202');
+        if (code) {
+            openRoom(message.channel, message.guild, !config.doctorMessaged );
+        }
+    }
+
     //Execute commands that start with `!` only!
     if (!message.content.startsWith(config.prefix) || message.author.bot)
         return;
@@ -59,14 +71,35 @@ bot.on('message', message => {
     }
 });
 
+async function openRoom(channel, guild, dm) {
+    channel.send('*An unidentified plant has been uncovered*');
+    if (dm) {
+        logger.info(channel.members);
+        let doctor = channel.members.find(m => m.displayName.toLowerCase() === config.doctor);
+        if (!doctor) {
+            return;
+        }
+        doctor.send('*You\'ve thoroughly analyzed the plant and have deduced that it is poisonous. What a surprise.*');
+        let admins = channel.members.filter(member => {config.admins.includes(member.displayName.toLowerCase());});
+
+        admins.map(admin => {admin.send('*Plant noticed*');});
+        config.doctorMessaged = true;
+        fs.writeFile("./config.json", JSON.stringify(config), (err) => {
+            if (err) {
+                console.log(err);
+            }});
+    }
+}
+
+
 async function listUsers(message) {
-    var str = 'The ticket masters\' spies have found the following people in these rooms:\n\n' ;
-    for (var key in rooms) {
+    let str = 'The Explorer has found the following astronauts in these locations:\n\n' ;
+    for (let key in rooms) {
         let role = message.guild.roles.cache.find(r => r.name.toLowerCase() === key.toLowerCase());
         str += role.toString() + ': ';
 
 
-        for (var member of message.guild.roles.cache.get(role.id).members) {
+        for (let member of message.guild.roles.cache.get(role.id).members) {
             str += member[1].toString() + ', ';
         }
         str = str.slice(0, -1);
@@ -83,7 +116,7 @@ async function enterRoom(user,channel , guild,  args, rooms) {
     logger.info('Try to enter room: ' + room);
     let role = guild.roles.cache.find(r => r.name.toLowerCase() === room);
     if (role === undefined) {
-        channel.send( "<@!" + user.id + ">" + " tried jumping off the train to reach the " + room +  ", but was thrown back by an invisible force.");
+        channel.send( "<@!" + user.id + ">" + " tried opening the airlock for a room that doesn't exist");
         return;
     }
 
@@ -98,7 +131,7 @@ async function enterRoom(user,channel , guild,  args, rooms) {
         let [roles, _ ] = user.roles.cache.partition(r => r.name.toLowerCase() in rooms && r.name.toLowerCase() !== role.name.toLowerCase() );
         await user.roles.remove(roles).catch(console.error);
         await user.roles.add(role).catch(console.error);
-        channel.send("<@" + user.id + ">" + ' has just boarded the ' + role.name +  '!');
+        channel.send("<@" + user.id + ">" + ' has just floated to the ' + role.name +  '!');
     } else {
         channel.send("<@" + user.id + ">" + ' bangs on the door to the ' + role.name + '. It doesn\'t open');
     }
