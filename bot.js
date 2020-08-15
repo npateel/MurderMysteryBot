@@ -38,12 +38,14 @@ bot.once('ready', () => {
 
 
 bot.on('message', message => {
+    // Makes sure we're not in a DM channel
     if (!message.channel.name) {
         return;
     }
-    if (!message.author.bot && message.channel.name.toLowerCase() === 'garden') {
+    // Special logic for our game this time around
+    if (!message.author.bot && message.channel.name.toLowerCase() === 'CLASSIFIED_ROOM') {
         tokens = message.content.split(/ +/);
-        code = tokens.find(tok => tok === '1202');
+        code = tokens.find(tok => tok === 'CLASSIFIED');
         if (code) {
             openRoom(message.channel, message.guild, !config.doctorMessaged );
         }
@@ -60,29 +62,30 @@ bot.on('message', message => {
 
     switch (cmd) {
         // !enter
-    case '!enter':
+    case (config.prefix + 'enter'):
         if (message.channel.name.toLowerCase() === config.commandsChannel)
             enterRoom(message.member, message.channel, message.guild, args, rooms );
         break;
-    case '!list':
+    case (config.prefix + 'list'):
         if (message.channel.name.toLowerCase() === config.commandsChannel)
             listUsers(message);
         break;
     }
 });
 
+// Some special code for the game this time around
 async function openRoom(channel, guild, dm) {
-    channel.send('*An unidentified plant has been uncovered*');
+    channel.send('*CLASSIFIED*');
     if (dm) {
         logger.info(channel.members);
         let doctor = channel.members.find(m => m.displayName.toLowerCase() === config.doctor);
         if (!doctor) {
             return;
         }
-        doctor.send('*You\'ve thoroughly analyzed the plant and have deduced that it is poisonous. What a surprise.*');
+        doctor.send('*CLASSIFIED*');
         let admins = channel.members.filter(member => {config.admins.includes(member.displayName.toLowerCase());});
 
-        admins.map(admin => {admin.send('*Plant noticed*');});
+        admins.map(admin => {admin.send('*CLASSIFIED*');});
         config.doctorMessaged = true;
         fs.writeFile("./config.json", JSON.stringify(config), (err) => {
             if (err) {
@@ -92,6 +95,7 @@ async function openRoom(channel, guild, dm) {
 }
 
 
+// !list command, which lists all users on the server with their roles
 async function listUsers(message) {
     let str = 'The Explorer has found the following astronauts in these locations:\n\n' ;
     for (let key in rooms) {
@@ -110,11 +114,12 @@ async function listUsers(message) {
 
 }
 
+// !enter command, which lists
 async function enterRoom(user,channel , guild,  args, rooms) {
     room = args.join(' ').toLowerCase();
-    // If the room same
     logger.info('Try to enter room: ' + room);
     let role = guild.roles.cache.find(r => r.name.toLowerCase() === room);
+    // Room doesn't exist
     if (role === undefined) {
         channel.send( "<@!" + user.id + ">" + " tried opening the airlock for a room that doesn't exist");
         return;
@@ -131,12 +136,15 @@ async function enterRoom(user,channel , guild,  args, rooms) {
         let [roles, _ ] = user.roles.cache.partition(r => r.name.toLowerCase() in rooms && r.name.toLowerCase() !== role.name.toLowerCase() );
         await user.roles.remove(roles).catch(console.error);
         await user.roles.add(role).catch(console.error);
+        // Successful room enter
         channel.send("<@" + user.id + ">" + ' has just floated to the ' + role.name +  '!');
     } else {
+        // Too many people in room
         channel.send("<@" + user.id + ">" + ' bangs on the door to the ' + role.name + '. It doesn\'t open');
     }
 }
 
+// Let our bot log in
 bot.login(auth.token);
 
 
